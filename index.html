@@ -87,11 +87,11 @@
       <input id="throttleSlider" type="hidden" min="-100" max="100" value="0" />
     </div>
 
-    <script type="module" src="app.js?v=2"></script>
+    <script type="module" src="app.js?v=3"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=2').catch((error) => {
+          navigator.serviceWorker.register('./service-worker.js?v=3').catch((error) => {
             console.warn('Service worker registration failed:', error);
           });
         });

@@ -37,3 +37,7 @@ Then open:
 This version registers `service-worker.js` and pre-caches the application shell.
 After the first successful HTTPS load/install, the UI can open without Internet.
 Bluetooth communication remains direct between the Android phone and the ESP32.
+
+
+## v3 multitouch fix
+Steering and throttle now track separate Pointer Events by pointerId, allowing true simultaneous two-thumb control without one control resetting or following the other finger.

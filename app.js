@@ -298,64 +298,82 @@ function updateManualSteering(clientX) {
 }
 
 function bindSteeringControl() {
-  let dragging = false;
+  let activePointerId = null;
 
   steeringTrack.addEventListener('pointerdown', (event) => {
-    if (currentMode !== 'manual') return;
-    dragging = true;
+    if (currentMode !== 'manual' || activePointerId !== null) return;
+
+    activePointerId = event.pointerId;
     event.preventDefault();
+
+    try {
+      steeringTrack.setPointerCapture(event.pointerId);
+    } catch (_) {}
+
     updateManualSteering(event.clientX);
   });
 
   window.addEventListener('pointermove', (event) => {
-    if (currentMode !== 'manual' || !dragging) return;
+    if (currentMode !== 'manual' || event.pointerId !== activePointerId) return;
+    event.preventDefault();
     updateManualSteering(event.clientX);
-  });
+  }, { passive: false });
 
-  window.addEventListener('pointerup', () => {
-    if (currentMode !== 'manual' || !dragging) return;
-    dragging = false;
+  window.addEventListener('pointerup', (event) => {
+    if (event.pointerId !== activePointerId) return;
+    activePointerId = null;
     resetSteering();
   });
 
-  window.addEventListener('pointercancel', () => {
-    if (currentMode !== 'manual') return;
-    dragging = false;
+  window.addEventListener('pointercancel', (event) => {
+    if (event.pointerId !== activePointerId) return;
+    activePointerId = null;
     resetSteering();
   });
 }
 
 function bindThrottleControl() {
-  let dragging = false;
+  let activePointerId = null;
 
-  throttleTrack.addEventListener('pointerdown', (event) => {
-    dragging = true;
+  const updateThrottleFromPointer = (event) => {
     const value = calculateThrottleFromPointer(event.clientY);
     const enforced = enforceReverseStopRule(value);
     throttleSlider.value = String(enforced);
     lastKnownSpeed = enforced;
     updateThrottleVisual();
-    if (isConnected) sendControlPacket(enforced, Number(steeringSlider.value), 0).catch(() => {});
+    if (isConnected) {
+      sendControlPacket(enforced, Number(steeringSlider.value), 0).catch(() => {});
+    }
+  };
+
+  throttleTrack.addEventListener('pointerdown', (event) => {
+    if (activePointerId !== null) return;
+
+    activePointerId = event.pointerId;
+    event.preventDefault();
+
+    try {
+      throttleTrack.setPointerCapture(event.pointerId);
+    } catch (_) {}
+
+    updateThrottleFromPointer(event);
   });
 
   window.addEventListener('pointermove', (event) => {
-    if (!dragging) return;
-    const value = calculateThrottleFromPointer(event.clientY);
-    const enforced = enforceReverseStopRule(value);
-    throttleSlider.value = String(enforced);
-    lastKnownSpeed = enforced;
-    updateThrottleVisual();
-    if (isConnected) sendControlPacket(enforced, Number(steeringSlider.value), 0).catch(() => {});
-  });
+    if (event.pointerId !== activePointerId) return;
+    event.preventDefault();
+    updateThrottleFromPointer(event);
+  }, { passive: false });
 
-  window.addEventListener('pointerup', () => {
-    if (!dragging) return;
-    dragging = false;
+  window.addEventListener('pointerup', (event) => {
+    if (event.pointerId !== activePointerId) return;
+    activePointerId = null;
     resetThrottle();
   });
 
-  window.addEventListener('pointercancel', () => {
-    dragging = false;
+  window.addEventListener('pointercancel', (event) => {
+    if (event.pointerId !== activePointerId) return;
+    activePointerId = null;
     resetThrottle();
   });
 }

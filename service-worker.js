@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rc-car-pwa-v2-fullscreen';
+const CACHE_NAME = 'rc-car-pwa-v3-multitouch';
 const APP_SHELL = [
   './',
   './index.html',
