@@ -37,9 +37,10 @@ let tiltReference = null;
 let lastTiltRaw = null;
 let smoothedTiltSteering = 0;
 
-const TILT_FULL_SCALE_DEG = 55;
-const TILT_DEADZONE_DEG = 3;
-const TILT_SMOOTHING = 0.25;
+const TILT_FULL_SCALE_DEG = 45;
+const TILT_DEADZONE_DEG = 2;
+const TILT_SMOOTHING = 0.45;
+const TILT_RESPONSE_EXPONENT = 1.10;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -171,6 +172,8 @@ function stopControlKeepAlive() {
 
 async function requestWakeLock() {
   if (!('wakeLock' in navigator)) return;
+  if (document.visibilityState !== 'visible' || wakeLock) return;
+
   try {
     wakeLock = await navigator.wakeLock.request('screen');
     wakeLock.addEventListener('release', () => {
@@ -188,11 +191,25 @@ function releaseWakeLock() {
   }
 }
 
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && isConnected) {
+function bindWakeLock() {
+  // This UI is a vehicle remote, so keep the display awake while the app
+  // is visible. Release the lock when the app is backgrounded so it does
+  // not keep the screen on unnecessarily.
+  requestWakeLock();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+  });
+
+  // Some Android builds grant the wake lock more reliably after interaction.
+  document.addEventListener('pointerdown', () => {
     requestWakeLock();
-  }
-});
+  }, { passive: true });
+}
 
 async function handleStatusNotification(event) {
   const data = new Uint8Array(event.target.value.buffer);
@@ -266,7 +283,6 @@ async function disconnectDevice() {
   if (!device) return;
   stopHeartbeatLoop();
   stopControlKeepAlive();
-  releaseWakeLock();
   try {
     await sendStop();
   } catch (err) {
@@ -494,7 +510,7 @@ function onTiltOrientation(event) {
 
   // Progressive curve: gentle near the center, full steering only at a
   // deliberate larger tilt. This makes small corrections much smoother.
-  const curved = Math.sign(normalized) * Math.pow(Math.abs(normalized), 1.35);
+  const curved = Math.sign(normalized) * Math.pow(Math.abs(normalized), TILT_RESPONSE_EXPONENT);
   const targetSteering = curved * 100;
 
   smoothedTiltSteering += (targetSteering - smoothedTiltSteering) * TILT_SMOOTHING;
@@ -557,6 +573,7 @@ function init() {
   bindModeButtons();
   bindButtons();
   bindInstallPrompt();
+  bindWakeLock();
 
   throttleSlider.value = '0';
   steeringSlider.value = '0';
