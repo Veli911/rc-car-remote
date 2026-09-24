@@ -62,3 +62,10 @@ Steering and throttle now track separate Pointer Events by pointerId, allowing t
 
 ## Tilt robustness update
 Tilt steering now uses the full 3D device orientation converted to quaternions and a relative swing/twist calculation. This avoids beta/gamma gimbal-lock spikes when the phone is reclined or nearly horizontal. Full steering remains approximately 40 degrees from the calibrated center.
+
+
+## Tilt v8
+- Uses gravity projected into the screen plane, so forward/back recline does not cause steering spikes.
+- Entering Tilt no longer auto-calibrates the current pose as zero.
+- Center explicitly calibrates the current roll as zero.
+- Returning to Manual always resets steering to 0.
