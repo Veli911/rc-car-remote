@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0f18" />
+    <title>RC Car Remote</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="remote-shell">
+        <header class="remote-header">
+          <div class="brand-box">
+            <span class="brand-label">RC CONTROL</span>
+            <strong>CARX</strong>
+          </div>
+
+          <div class="top-actions">
+            <button id="installBtn" class="ghost hidden">Install</button>
+            <button id="connectBtn" class="connect-btn">Connect</button>
+          </div>
+        </header>
+
+        <section class="lcd-strip">
+          <div class="lcd-panel">
+            <span>BLE</span>
+            <strong id="statusText">Disconnected</strong>
+          </div>
+          <div class="lcd-panel">
+            <span>RANGE</span>
+            <strong id="distanceText">-- mm</strong>
+          </div>
+          <div class="lcd-panel">
+            <span>BAT</span>
+            <strong id="batteryText">-- V</strong>
+          </div>
+        </section>
+
+        <main class="remote-body">
+          <section class="drive-panel left-panel">
+            <div class="panel-row">
+              <span>Steering</span>
+              <strong id="steeringValue">0</strong>
+            </div>
+
+            <div class="steering-box">
+              <div id="steeringTrack" class="steering-track" aria-label="Steering slider">
+                <div class="steering-center-line"></div>
+                <div id="steeringFill" class="steering-fill"></div>
+              </div>
+            </div>
+
+            <div class="wheel-scale">
+              <span>Left</span>
+              <span>Right</span>
+            </div>
+          </section>
+
+          <section class="drive-panel right-panel">
+            <div class="panel-row">
+              <span>Throttle</span>
+              <strong id="throttleValue">0</strong>
+            </div>
+
+            <div class="throttle-box">
+              <div id="throttleTrack" class="throttle-track" aria-label="Throttle slider">
+                <div class="throttle-center-line"></div>
+                <div id="throttleFill" class="throttle-fill"></div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="remote-footer">
+          <div class="mode-switcher">
+            <button class="mode-button active" data-mode="manual">Manual</button>
+            <button class="mode-button" data-mode="tilt">Tilt</button>
+          </div>
+
+          <button id="centerBtn" class="center-btn">Center</button>
+        </footer>
+      </div>
+
+      <input id="steeringSlider" type="hidden" min="-100" max="100" value="0" />
+      <input id="throttleSlider" type="hidden" min="-100" max="100" value="0" />
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js').catch((error) => {
+            console.warn('Service worker registration failed:', error);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

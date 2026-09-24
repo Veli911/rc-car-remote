@@ -1,0 +1,449 @@
+:root {
+  --bg: #070d18;
+  --bg-2: #0f172a;
+  --shell: #121a29;
+  --shell-2: #18263f;
+  --panel: rgba(18, 26, 41, 0.96);
+  --panel-2: rgba(26, 35, 51, 0.9);
+  --trim: #f97316;
+  --trim-2: #facc15;
+  --accent: #5eead4;
+  --accent-2: #7dd3fc;
+  --danger: #ef4444;
+  --text: #edf6ff;
+  --muted: #a8b6d2;
+  --shadow: rgba(2, 6, 23, 0.75);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at top, #172a46 0%, #0a1322 30%, #040a12 100%);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 12px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+}
+
+button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.app-shell {
+  width: min(100%, 860px);
+  padding: 18px;
+}
+
+.remote-shell {
+  background: linear-gradient(180deg, var(--shell) 0%, #0d1522 38%, #070d18 100%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 28px;
+  box-shadow: 0 26px 45px var(--shadow);
+  padding: 18px 18px 16px;
+  position: relative;
+}
+
+.remote-shell::before {
+  content: "";
+  position: absolute;
+  inset: 12px 14px auto 14px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.9), rgba(250, 204, 21, 0.6), rgba(125, 211, 252, 0.5));
+}
+
+.remote-header,
+.remote-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 6px;
+}
+
+.brand-label {
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.brand-box strong {
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  letter-spacing: 0.08em;
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.connect-btn,
+.mode-button,
+.secondary,
+.danger,
+.ghost,
+.center-btn {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.connect-btn {
+  background: linear-gradient(135deg, var(--accent), #34d399);
+  color: #062116;
+}
+
+.ghost {
+  background: rgba(125, 211, 252, 0.08);
+  color: var(--text);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+}
+
+.secondary {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.danger {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  color: white;
+}
+
+.hidden {
+  display: none;
+}
+
+.lcd-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.lcd-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(10, 15, 25, 0.95));
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.lcd-panel strong {
+  color: var(--text);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.remote-body {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.drive-panel {
+  background: linear-gradient(180deg, rgba(22, 33, 48, 0.92), rgba(13, 21, 32, 0.96));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  margin-bottom: 12px;
+}
+
+.panel-row strong {
+  color: var(--text);
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.steering-box {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 270px;
+  padding: 20px 20px 20px 14px;
+}
+
+.steering-track {
+  position: relative;
+  width: min(64%, 390px);
+  min-width: 300px;
+  height: 96px;
+  border-radius: 50px;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.98),
+    rgba(26, 35, 51, 0.98),
+    rgba(15, 23, 42, 0.98)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: inset 0 10px 24px rgba(2, 6, 23, 0.55);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.steering-center-line {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  bottom: 18%;
+  width: 4px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.38);
+  z-index: 3;
+}
+
+.steering-fill {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 50%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(94, 234, 212, 0.28),
+    rgba(94, 234, 212, 0.65)
+  );
+  box-shadow: 0 0 18px rgba(94, 234, 212, 0.22);
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+.wheel-scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+}
+
+.throttle-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(16, 27, 39, 0.95), rgba(9, 15, 22, 0.95));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 24px;
+  padding: 12px;
+  height: 100%;
+  min-height: 300px;
+}
+
+.throttle-track {
+  position: relative;
+  width: 110px;
+  height: 240px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.9), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: inset 0 12px 20px rgba(2, 6, 23, 0.45);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.throttle-center-line {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 2px;
+  background: rgba(148, 163, 184, 0.3);
+  transform: translateY(-50%);
+}
+
+.throttle-fill {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 50%;
+  height: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--accent), #22c55e);
+  box-shadow: 0 0 16px rgba(94, 234, 212, 0.35);
+}
+
+.throttle-fill.reverse {
+  background: linear-gradient(180deg, #f59e0b, var(--danger));
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+}
+
+.remote-footer {
+  margin-top: 18px;
+}
+
+.mode-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+  padding: 6px;
+}
+
+.mode-button {
+  background: transparent;
+  color: var(--muted);
+  min-width: 92px;
+}
+
+.mode-button.active {
+  background: rgba(94, 234, 212, 0.12);
+  border: 1px solid rgba(94, 234, 212, 0.18);
+  color: var(--text);
+}
+
+.center-btn {
+  background: rgba(125, 211, 252, 0.1);
+  color: var(--text);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  min-width: 100px;
+}
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.action-row button {
+  min-width: 120px;
+}
+
+@media (max-width: 620px) {
+  .app-shell {
+    padding: 8px;
+  }
+
+  .remote-shell {
+    padding: 14px 12px 12px;
+  }
+
+  .remote-body {
+    grid-template-columns: 1fr;
+  }
+
+  .lcd-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .remote-header,
+  .remote-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .top-actions,
+  .action-row {
+    width: 100%;
+  }
+
+  .action-row {
+    justify-content: stretch;
+  }
+
+  .action-row button,
+  .top-actions button {
+    flex: 1;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .app-shell {
+    padding: 8px;
+  }
+
+  .remote-shell {
+    padding-top: 14px;
+  }
+
+  .lcd-strip {
+    margin-top: 12px;
+  }
+
+  .remote-body {
+    margin-top: 12px;
+  }
+
+  .drive-panel {
+    padding: 12px;
+  }
+
+  .steering-box {
+    min-height: 165px;
+    padding: 10px 10px 10px 4px;
+  }
+
+  .steering-track {
+    width: min(60%, 340px);
+    min-width: 240px;
+    height: 78px;
+  }
+
+  
+
+  .throttle-track {
+    width: 90px;
+    height: 180px;
+  }
+}

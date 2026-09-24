@@ -1,0 +1,18 @@
+{
+  "name": "RC Car Remote",
+  "short_name": "RC Car",
+  "description": "Bluetooth remote control for RC robot car",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#22c55e",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
