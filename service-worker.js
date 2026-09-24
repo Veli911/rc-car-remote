@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rc-car-pwa-v5-tilt45-wakelock';
+const CACHE_NAME = 'rc-car-pwa-v6-tilt40-wakelock';
 const APP_SHELL = [
   './',
   './index.html',

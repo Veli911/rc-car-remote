@@ -37,7 +37,7 @@ let tiltReference = null;
 let lastTiltRaw = null;
 let smoothedTiltSteering = 0;
 
-const TILT_FULL_SCALE_DEG = 45;
+const TILT_FULL_SCALE_DEG = 40;
 const TILT_DEADZONE_DEG = 2;
 const TILT_SMOOTHING = 0.45;
 const TILT_RESPONSE_EXPONENT = 1.10;

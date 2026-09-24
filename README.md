@@ -48,12 +48,12 @@ Steering and throttle now track separate Pointer Events by pointerId, allowing t
 - Tilt steering now follows the phone's current screen orientation, including landscape.
 - The current holding angle is calibrated as neutral when Tilt is enabled or Center is pressed.
 - A 3 degree dead zone, progressive response curve, and smoothing make small steering corrections gentler.
-- Full steering is reached only after a deliberate larger tilt (about 55 degrees from the calibrated center).
+- Full steering is reached only after a deliberate larger tilt (about 40 degrees from the calibrated center).
 
 
 ## Tilt + screen behavior (v5)
 
-- Tilt reaches approximately 100% steering at 45 degrees from the calibrated center.
+- Tilt reaches approximately 100% steering at 40 degrees from the calibrated center.
 - 2 degree center dead zone.
 - Faster smoothing for a more direct response.
 - Screen Wake Lock is requested while the app is visible, even before BLE connection.
