@@ -33,8 +33,8 @@ let deferredPrompt = null;
 let currentMode = 'manual';
 let lastKnownSpeed = 0;
 let lastKnownSteering = 0;
-let tiltReference = null;
-let lastTiltRaw = null;
+let tiltReferenceQuaternion = null;
+let lastTiltQuaternion = null;
 let smoothedTiltSteering = 0;
 
 const TILT_FULL_SCALE_DEG = 40;
@@ -426,8 +426,8 @@ function bindModeButtons() {
       currentMode = button.dataset.mode;
 
       if (currentMode === 'tilt') {
-        tiltReference = null;
-        lastTiltRaw = null;
+        tiltReferenceQuaternion = null;
+        lastTiltQuaternion = null;
         smoothedTiltSteering = 0;
 
         if (typeof DeviceOrientationEvent !== 'undefined') {
@@ -443,8 +443,8 @@ function bindModeButtons() {
         }
       } else {
         window.removeEventListener('deviceorientation', onTiltOrientation);
-        tiltReference = null;
-        lastTiltRaw = null;
+        tiltReferenceQuaternion = null;
+        lastTiltQuaternion = null;
         smoothedTiltSteering = 0;
       }
     });
@@ -459,23 +459,93 @@ function getScreenOrientationAngle() {
   return ((screenAngle % 360) + 360) % 360;
 }
 
-function getTiltForSteering(event) {
-  const beta = typeof event.beta === 'number' ? event.beta : 0;
-  const gamma = typeof event.gamma === 'number' ? event.gamma : 0;
+function normalizeQuaternion(q) {
+  const length = Math.hypot(q.w, q.x, q.y, q.z) || 1;
+  return {
+    w: q.w / length,
+    x: q.x / length,
+    y: q.y / length,
+    z: q.z / length
+  };
+}
+
+function multiplyQuaternions(a, b) {
+  return {
+    w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+    x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+    y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+    z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w
+  };
+}
+
+function inverseQuaternion(q) {
+  return { w: q.w, x: -q.x, y: -q.y, z: -q.z };
+}
+
+function axisAngleQuaternion(axis, angleRad) {
+  const half = angleRad / 2;
+  const s = Math.sin(half);
+  return {
+    w: Math.cos(half),
+    x: axis === 'x' ? s : 0,
+    y: axis === 'y' ? s : 0,
+    z: axis === 'z' ? s : 0
+  };
+}
+
+function deviceOrientationToQuaternion(event) {
+  if (typeof event.beta !== 'number' || typeof event.gamma !== 'number') return null;
+
+  const alpha = (typeof event.alpha === 'number' ? event.alpha : 0) * Math.PI / 180;
+  const beta = event.beta * Math.PI / 180;
+  const gamma = event.gamma * Math.PI / 180;
+
+  // DeviceOrientation uses intrinsic Z-X'-Y'' rotations. Rebuilding the full
+  // 3D orientation as a quaternion avoids the Euler-angle singularity that
+  // makes beta/gamma jump when the phone is strongly pitched toward/away
+  // from the user.
+  const qAlpha = axisAngleQuaternion('z', alpha);
+  const qBeta = axisAngleQuaternion('x', beta);
+  const qGamma = axisAngleQuaternion('y', gamma);
+
+  return normalizeQuaternion(
+    multiplyQuaternions(multiplyQuaternions(qAlpha, qBeta), qGamma)
+  );
+}
+
+function getSteeringAxis() {
   const angle = getScreenOrientationAngle();
 
-  // Convert the sensor axes to the left/right axis of the CURRENT screen.
-  // In landscape the phone's beta axis becomes the steering axis.
-  if (angle === 90) return beta;
-  if (angle === 270) return -beta;
-  if (angle === 180) return -gamma;
-  return gamma;
+  // Match the old screen-relative behavior, but extract the rotation from the
+  // full 3D orientation instead of reading beta/gamma directly.
+  if (angle === 90) return { axis: 'x', sign: 1 };
+  if (angle === 270) return { axis: 'x', sign: -1 };
+  if (angle === 180) return { axis: 'y', sign: -1 };
+  return { axis: 'y', sign: 1 };
+}
+
+function getSignedTwistAngleDeg(relativeQuaternion, axis, sign) {
+  const component = axis === 'x' ? relativeQuaternion.x : relativeQuaternion.y;
+
+  // Swing-twist decomposition: keep only the rotation around the steering
+  // axis. Pitch/yaw can change freely without creating a false steering spike.
+  const length = Math.hypot(relativeQuaternion.w, component);
+  if (length < 1e-6) return 0;
+
+  const w = relativeQuaternion.w / length;
+  const v = component / length;
+  let angle = 2 * Math.atan2(v, w) * 180 / Math.PI;
+
+  if (angle > 180) angle -= 360;
+  if (angle < -180) angle += 360;
+
+  return angle * sign;
 }
 
 function centerTilt() {
-  // Calibrate around the way the phone is being held right now.
-  // If no sensor sample has arrived yet, the first sample becomes the center.
-  tiltReference = lastTiltRaw;
+  // The complete current 3D pose becomes the neutral position. This means the
+  // phone may be upright, reclined, or almost horizontal when Tilt is enabled.
+  tiltReferenceQuaternion = lastTiltQuaternion;
   smoothedTiltSteering = 0;
   steeringSlider.value = '0';
   lastKnownSteering = 0;
@@ -487,16 +557,28 @@ function centerTilt() {
 }
 
 function onTiltOrientation(event) {
-  const rawTilt = getTiltForSteering(event);
-  lastTiltRaw = rawTilt;
+  const currentQuaternion = deviceOrientationToQuaternion(event);
+  if (!currentQuaternion) return;
 
-  // First valid sample after enabling Tilt establishes the neutral position.
-  if (tiltReference === null) {
-    tiltReference = rawTilt;
+  lastTiltQuaternion = currentQuaternion;
+
+  // The first valid sample after enabling Tilt establishes the neutral pose.
+  if (tiltReferenceQuaternion === null) {
+    tiltReferenceQuaternion = currentQuaternion;
     return;
   }
 
-  let relative = rawTilt - tiltReference;
+  // Relative rotation in the phone's calibrated coordinate system.
+  const relativeQuaternion = normalizeQuaternion(
+    multiplyQuaternions(inverseQuaternion(tiltReferenceQuaternion), currentQuaternion)
+  );
+
+  const steeringAxis = getSteeringAxis();
+  let relative = getSignedTwistAngleDeg(
+    relativeQuaternion,
+    steeringAxis.axis,
+    steeringAxis.sign
+  );
 
   // Small hand movements around the center should not steer the car.
   if (Math.abs(relative) <= TILT_DEADZONE_DEG) {
@@ -508,8 +590,6 @@ function onTiltOrientation(event) {
   const usableRange = TILT_FULL_SCALE_DEG - TILT_DEADZONE_DEG;
   const normalized = clamp(relative / usableRange, -1, 1);
 
-  // Progressive curve: gentle near the center, full steering only at a
-  // deliberate larger tilt. This makes small corrections much smoother.
   const curved = Math.sign(normalized) * Math.pow(Math.abs(normalized), TILT_RESPONSE_EXPONENT);
   const targetSteering = curved * 100;
 
