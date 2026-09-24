@@ -33,8 +33,13 @@ let deferredPrompt = null;
 let currentMode = 'manual';
 let lastKnownSpeed = 0;
 let lastKnownSteering = 0;
-let tiltReference = 0;
+let tiltReference = null;
+let lastTiltRaw = null;
 let smoothedTiltSteering = 0;
+
+const TILT_FULL_SCALE_DEG = 55;
+const TILT_DEADZONE_DEG = 3;
+const TILT_SMOOTHING = 0.25;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -405,6 +410,10 @@ function bindModeButtons() {
       currentMode = button.dataset.mode;
 
       if (currentMode === 'tilt') {
+        tiltReference = null;
+        lastTiltRaw = null;
+        smoothedTiltSteering = 0;
+
         if (typeof DeviceOrientationEvent !== 'undefined') {
           if (typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission().then(() => {
@@ -418,14 +427,39 @@ function bindModeButtons() {
         }
       } else {
         window.removeEventListener('deviceorientation', onTiltOrientation);
+        tiltReference = null;
+        lastTiltRaw = null;
         smoothedTiltSteering = 0;
       }
     });
   });
 }
 
+function getScreenOrientationAngle() {
+  const screenAngle = screen.orientation && typeof screen.orientation.angle === 'number'
+    ? screen.orientation.angle
+    : (typeof window.orientation === 'number' ? window.orientation : 0);
+
+  return ((screenAngle % 360) + 360) % 360;
+}
+
+function getTiltForSteering(event) {
+  const beta = typeof event.beta === 'number' ? event.beta : 0;
+  const gamma = typeof event.gamma === 'number' ? event.gamma : 0;
+  const angle = getScreenOrientationAngle();
+
+  // Convert the sensor axes to the left/right axis of the CURRENT screen.
+  // In landscape the phone's beta axis becomes the steering axis.
+  if (angle === 90) return beta;
+  if (angle === 270) return -beta;
+  if (angle === 180) return -gamma;
+  return gamma;
+}
+
 function centerTilt() {
-  tiltReference = 0;
+  // Calibrate around the way the phone is being held right now.
+  // If no sensor sample has arrived yet, the first sample becomes the center.
+  tiltReference = lastTiltRaw;
   smoothedTiltSteering = 0;
   steeringSlider.value = '0';
   lastKnownSteering = 0;
@@ -437,13 +471,36 @@ function centerTilt() {
 }
 
 function onTiltOrientation(event) {
-  const rawTilt = Number(typeof event.gamma === 'number' ? event.gamma : (event.beta ?? 0));
-  const relative = rawTilt - tiltReference;
-  const normalized = clamp(relative, -45, 45);
-  const filtered = clamp(Math.round((normalized / 45) * 100), -100, 100);
+  const rawTilt = getTiltForSteering(event);
+  lastTiltRaw = rawTilt;
 
-  smoothedTiltSteering = smoothedTiltSteering * 0.7 + filtered * 0.3;
-  const steering = clamp(Math.round(smoothedTiltSteering), -100, 100);
+  // First valid sample after enabling Tilt establishes the neutral position.
+  if (tiltReference === null) {
+    tiltReference = rawTilt;
+    return;
+  }
+
+  let relative = rawTilt - tiltReference;
+
+  // Small hand movements around the center should not steer the car.
+  if (Math.abs(relative) <= TILT_DEADZONE_DEG) {
+    relative = 0;
+  } else {
+    relative -= Math.sign(relative) * TILT_DEADZONE_DEG;
+  }
+
+  const usableRange = TILT_FULL_SCALE_DEG - TILT_DEADZONE_DEG;
+  const normalized = clamp(relative / usableRange, -1, 1);
+
+  // Progressive curve: gentle near the center, full steering only at a
+  // deliberate larger tilt. This makes small corrections much smoother.
+  const curved = Math.sign(normalized) * Math.pow(Math.abs(normalized), 1.35);
+  const targetSteering = curved * 100;
+
+  smoothedTiltSteering += (targetSteering - smoothedTiltSteering) * TILT_SMOOTHING;
+
+  let steering = clamp(Math.round(smoothedTiltSteering), -100, 100);
+  if (Math.abs(steering) < 2) steering = 0;
 
   steeringSlider.value = String(steering);
   lastKnownSteering = steering;

@@ -41,3 +41,11 @@ Bluetooth communication remains direct between the Android phone and the ESP32.
 
 ## v3 multitouch fix
 Steering and throttle now track separate Pointer Events by pointerId, allowing true simultaneous two-thumb control without one control resetting or following the other finger.
+
+
+## Tilt steering update
+
+- Tilt steering now follows the phone's current screen orientation, including landscape.
+- The current holding angle is calibrated as neutral when Tilt is enabled or Center is pressed.
+- A 3 degree dead zone, progressive response curve, and smoothing make small steering corrections gentler.
+- Full steering is reached only after a deliberate larger tilt (about 55 degrees from the calibrated center).
