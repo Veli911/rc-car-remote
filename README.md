@@ -58,3 +58,19 @@ Steering and throttle now track separate Pointer Events by pointerId, allowing t
 - Faster smoothing for a more direct response.
 - Screen Wake Lock is requested while the app is visible, even before BLE connection.
 - Wake Lock is released when the app goes to the background.
+
+
+## Tilt robustness update
+Tilt steering now uses the full 3D device orientation converted to quaternions and a relative swing/twist calculation. This avoids beta/gamma gimbal-lock spikes when the phone is reclined or nearly horizontal. Full steering remains approximately 40 degrees from the calibrated center.
+
+
+## Tilt v8
+- Uses gravity projected into the screen plane, so forward/back recline does not cause steering spikes.
+- Entering Tilt no longer auto-calibrates the current pose as zero.
+- Center explicitly calibrates the current roll as zero.
+- Returning to Manual always resets steering to 0.
+
+
+## Tilt auto-center update
+
+When switching from Manual to Tilt, the first valid orientation sample is automatically used as the neutral steering position. The Center button remains available for manual recalibration.
