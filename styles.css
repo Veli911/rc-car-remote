@@ -447,3 +447,243 @@ button:active {
     height: 180px;
   }
 }
+
+/* Phone landscape / PWA fullscreen layout (target: ~6.39\" 19.5:9) */
+@media (orientation: landscape) and (max-height: 500px) {
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    min-height: 100dvh;
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .app-shell {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    padding:
+      max(4px, env(safe-area-inset-top))
+      max(6px, env(safe-area-inset-right))
+      max(4px, env(safe-area-inset-bottom))
+      max(6px, env(safe-area-inset-left));
+  }
+
+  .remote-shell {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 10px 12px 8px;
+    border-radius: 20px;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 7px;
+    overflow: hidden;
+  }
+
+  .remote-shell::before {
+    inset: 5px 12px auto 12px;
+    height: 3px;
+  }
+
+  .remote-header,
+  .remote-footer {
+    min-height: 0;
+  }
+
+  .brand-box {
+    gap: 0;
+    padding-left: 4px;
+  }
+
+  .brand-label {
+    font-size: 0.54rem;
+  }
+
+  .brand-box strong {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .connect-btn,
+  .mode-button,
+  .secondary,
+  .danger,
+  .ghost,
+  .center-btn {
+    min-height: 34px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+  }
+
+  .lcd-strip {
+    margin-top: 0;
+    gap: 8px;
+  }
+
+  .lcd-panel {
+    min-height: 36px;
+    padding: 7px 10px;
+    border-radius: 11px;
+    font-size: 0.58rem;
+  }
+
+  .lcd-panel strong {
+    font-size: 0.72rem;
+  }
+
+  .remote-body {
+    min-height: 0;
+    height: 100%;
+    margin-top: 0;
+    gap: 10px;
+    grid-template-columns: 1.45fr 0.55fr;
+  }
+
+  .drive-panel {
+    min-height: 0;
+    height: 100%;
+    padding: 9px 11px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .left-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .right-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .panel-row {
+    margin-bottom: 3px;
+    font-size: 0.58rem;
+    line-height: 1;
+  }
+
+  .panel-row strong {
+    font-size: 1rem;
+  }
+
+  .steering-box {
+    min-height: 0;
+    height: 100%;
+    padding: 0 4px;
+    justify-content: flex-start;
+  }
+
+  .steering-track {
+    width: min(66%, 320px);
+    min-width: 215px;
+    height: clamp(58px, 18vh, 72px);
+    border-radius: 40px;
+  }
+
+  .steering-fill {
+    top: 10px;
+    bottom: 10px;
+  }
+
+  .steering-center-line {
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+  }
+
+  .wheel-scale {
+    font-size: 0.56rem;
+    line-height: 1;
+  }
+
+  .throttle-box {
+    min-height: 0;
+    height: 100%;
+    padding: 5px;
+    border-radius: 17px;
+  }
+
+  .throttle-track {
+    width: clamp(58px, 10vw, 76px);
+    height: min(100%, 150px);
+    min-height: 105px;
+    border-radius: 24px;
+  }
+
+  .throttle-fill {
+    left: 10px;
+    right: 10px;
+  }
+
+  .remote-footer {
+    margin-top: 0;
+    gap: 8px;
+  }
+
+  .mode-switcher {
+    gap: 3px;
+    padding: 3px;
+    border-radius: 11px;
+  }
+
+  .mode-button {
+    min-width: 74px;
+  }
+
+  .center-btn {
+    min-width: 82px;
+  }
+}
+
+/* Extra-tight fallback for browser chrome or smaller landscape viewports. */
+@media (orientation: landscape) and (max-height: 360px) {
+  .remote-shell {
+    padding: 8px 10px 6px;
+    gap: 5px;
+  }
+
+  .brand-label {
+    display: none;
+  }
+
+  .brand-box strong {
+    font-size: 1.05rem;
+  }
+
+  .lcd-panel {
+    min-height: 30px;
+    padding: 5px 8px;
+  }
+
+  .drive-panel {
+    padding: 7px 9px;
+  }
+
+  .steering-track {
+    height: 54px;
+  }
+
+  .throttle-track {
+    height: min(100%, 122px);
+    min-height: 88px;
+  }
+
+  .connect-btn,
+  .mode-button,
+  .ghost,
+  .center-btn {
+    min-height: 30px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}
