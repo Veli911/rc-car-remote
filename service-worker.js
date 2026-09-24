@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rc-car-pwa-v8-tilt40-gravity';
+const CACHE_NAME = 'rc-car-pwa-v9-tilt40-autocenter';
 const APP_SHELL = [
   './',
   './index.html',

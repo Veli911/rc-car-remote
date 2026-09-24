@@ -69,3 +69,8 @@ Tilt steering now uses the full 3D device orientation converted to quaternions a
 - Entering Tilt no longer auto-calibrates the current pose as zero.
 - Center explicitly calibrates the current roll as zero.
 - Returning to Manual always resets steering to 0.
+
+
+## Tilt auto-center update
+
+When switching from Manual to Tilt, the first valid orientation sample is automatically used as the neutral steering position. The Center button remains available for manual recalibration.
