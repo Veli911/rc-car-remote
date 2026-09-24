@@ -46,13 +46,6 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function shortestAngleDelta(current, reference) {
-  let delta = current - reference;
-  while (delta > 180) delta -= 360;
-  while (delta < -180) delta += 360;
-  return delta;
-}
-
 function setStatus(text) {
   statusText.textContent = text;
 }
@@ -453,7 +446,6 @@ function bindModeButtons() {
         tiltReference = null;
         lastTiltRaw = null;
         smoothedTiltSteering = 0;
-        resetSteering();
       }
     });
   });
@@ -496,19 +488,6 @@ function centerTilt() {
 
 function onTiltOrientation(event) {
   const rawTilt = getTiltForSteering(event);
-
-  // DeviceOrientation uses Euler angles. Around some reversed/steep phone
-  // positions the reported angle can suddenly jump even though the phone only
-  // moved a little. Preserve the previous steering offset across such a jump
-  // instead of interpreting it as an instant full-lock command.
-  if (lastTiltRaw !== null && tiltReference !== null) {
-    const sampleJump = shortestAngleDelta(rawTilt, lastTiltRaw);
-    if (Math.abs(sampleJump) > 25) {
-      const previousRelative = shortestAngleDelta(lastTiltRaw, tiltReference);
-      tiltReference = rawTilt - previousRelative;
-    }
-  }
-
   lastTiltRaw = rawTilt;
 
   // First valid sample after enabling Tilt establishes the neutral position.
@@ -517,7 +496,7 @@ function onTiltOrientation(event) {
     return;
   }
 
-  let relative = shortestAngleDelta(rawTilt, tiltReference);
+  let relative = rawTilt - tiltReference;
 
   // Small hand movements around the center should not steer the car.
   if (Math.abs(relative) <= TILT_DEADZONE_DEG) {
